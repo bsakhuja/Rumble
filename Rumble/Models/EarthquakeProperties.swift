@@ -80,5 +80,3 @@ extension EarthquakeProperties: Decodable {
 extension EarthquakeProperties {
     static let testEarthquakeProperties = EarthquakeProperties(magnitude: 2.4, place: "10km SSW of Idyllwild, CA", time: 1388620296020, code: "code", detail: nil, tsunami: false, title: "M 1.3 - 10km SSW of Idyllwild, CA", url: URL(string: "https://earthquake.usgs.gov/earthquakes/eventpage/tx2024eqpe"))
 }
-
-

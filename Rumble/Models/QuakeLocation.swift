@@ -8,7 +8,9 @@
 import Foundation
 
 struct QuakeLocation: Decodable {
+    // swiftlint:disable:next force_unwrapping
     var latitude: Double { properties.products.origin.first!.properties.latitude }
+    // swiftlint:disable:next force_unwrapping
     var longitude: Double { properties.products.origin.first!.properties.longitude }
     private var properties: RootProperties
     

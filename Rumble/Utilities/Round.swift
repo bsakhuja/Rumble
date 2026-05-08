@@ -14,13 +14,10 @@ public enum RoundingPrecision {
     case hundredths
 }
 
-
-
 // Round to the specific decimal place
 public func preciseRound(
     _ value: Double,
-    precision: RoundingPrecision = .ones) -> String
-{
+    precision: RoundingPrecision = .ones) -> String {
     switch precision {
     case .ones:
         return String(round(value))

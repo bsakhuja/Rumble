@@ -35,7 +35,7 @@ class SettingsState: ObservableObject {
         0..<magnitudeUpper+1
     }
     
-    var availableMaxMagnitudes: Range<Int>  {
+    var availableMaxMagnitudes: Range<Int> {
         magnitudeLower..<maximumMagnitude+1
     }
     

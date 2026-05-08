@@ -79,5 +79,5 @@ extension EarthquakeGeometry {
         self.coordinates = coordinates
     }
     
-    static let testEarthquakeGeometry = EarthquakeGeometry(type: "Point", coordinates: [-116.7776667,33.6633333,11.008])
+    static let testEarthquakeGeometry = EarthquakeGeometry(type: "Point", coordinates: [-116.7776667, 33.6633333, 11.008])
 }

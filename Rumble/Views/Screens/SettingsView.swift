@@ -64,15 +64,12 @@ struct SettingsView: View {
             .navigationTitle("Search Settings")
 
         }
-        
-        
     }
 }
 
 #Preview("Default") {
     SettingsView(state: SettingsState())
 }
-
 
 enum SortMethod: String, CaseIterable, Identifiable {
     var id: String { return self.rawValue }
