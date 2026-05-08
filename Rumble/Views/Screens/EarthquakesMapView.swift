@@ -29,8 +29,7 @@ struct EarthquakesMapView: View {
     
     var body: some View {
         if let earthquakes = filteredEarthquakes,
-           earthquakes.count > 0
-        {
+           !earthquakes.isEmpty {
             Map(initialPosition: initialMapCameraPosition,
                 selection: $selectedEarthquake) {
                 Marker(item: .forCurrentLocation())

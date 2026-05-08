@@ -23,8 +23,8 @@ struct EarthquakeListView: View {
             return filtered
         case .locationAscending:
             if let userLocation = settings.userLocation {
-                return filtered?.sorted(by: { e1, e2 in
-                    e1.geometry.clLocation.distance(from: userLocation) < e2.geometry.clLocation.distance(from: userLocation)
+                return filtered?.sorted(by: { lhs, rhs in
+                    lhs.geometry.clLocation.distance(from: userLocation) < rhs.geometry.clLocation.distance(from: userLocation)
                 })
             } else {
                 return filtered
@@ -32,27 +32,27 @@ struct EarthquakeListView: View {
             
         case .locationDescending:
             if let userLocation = settings.userLocation {
-                return filtered?.sorted(by: { e1, e2 in
-                    e1.geometry.clLocation.distance(from: userLocation) > e2.geometry.clLocation.distance(from: userLocation)
+                return filtered?.sorted(by: { lhs, rhs in
+                    lhs.geometry.clLocation.distance(from: userLocation) > rhs.geometry.clLocation.distance(from: userLocation)
                 })
             } else {
                 return filtered
             }
         case .magnitudeAscending:
-            return filtered?.sorted(by: { e1, e2 in
-                e1.properties.magnitude < e2.properties.magnitude
+            return filtered?.sorted(by: { lhs, rhs in
+                lhs.properties.magnitude < rhs.properties.magnitude
             })
         case .magnitudeDescending:
-            return filtered?.sorted(by: { e1, e2 in
-                e1.properties.magnitude > e2.properties.magnitude
+            return filtered?.sorted(by: { lhs, rhs in
+                lhs.properties.magnitude > rhs.properties.magnitude
             })
         case .timeAscending:
-            return filtered?.sorted(by: { e1, e2 in
-                e1.properties.time < e2.properties.time
+            return filtered?.sorted(by: { lhs, rhs in
+                lhs.properties.time < rhs.properties.time
             })
         case .timeDescending:
-            return filtered?.sorted(by: { e1, e2 in
-                e1.properties.time > e2.properties.time
+            return filtered?.sorted(by: { lhs, rhs in
+                lhs.properties.time > rhs.properties.time
             })
         }
         
@@ -72,7 +72,7 @@ struct EarthquakeListView: View {
         ZStack {
             NavigationStack {
                 Group {
-                    if let earthquakes = searchResults, earthquakes.count > 0 {
+                    if let earthquakes = searchResults, !earthquakes.isEmpty {
                         ScrollView {
                             LazyVStack {
                                 ForEach(earthquakes, id: \.self) { earthquake in

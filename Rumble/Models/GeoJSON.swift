@@ -14,8 +14,7 @@ struct GeoJSON: Decodable {
     private enum RootCodingKeys: String, CodingKey {
         case features
     }
-    
-    
+
     init(from decoder: Decoder) throws {
         let rootContainer = try decoder.container(keyedBy: RootCodingKeys.self)
         let earthquakes = try rootContainer.decode([Earthquake].self, forKey: .features)

@@ -26,7 +26,7 @@ class EarthquakesState: ObservableObject {
         isLoading = true
         earthquakeService.getEarthquakes(startTime: startTime, endTime: endTime)
             .receive(on: RunLoop.main)
-            .sink(receiveCompletion: { data in
+            .sink(receiveCompletion: { _ in
             
         }, receiveValue: { [weak self] data in
             self?.earthquakes = data.earthquakes

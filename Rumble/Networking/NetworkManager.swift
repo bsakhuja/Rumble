@@ -40,6 +40,7 @@ enum EarthquakeEndpoint: APIEndpoint {
     case query(startTime: String, endTime: String)
     
     var baseURL: URL {
+        // swiftlint:disable:next force_unwrapping
         return URL(string: "https://earthquake.usgs.gov/fdsnws/event/1")!
     }
     

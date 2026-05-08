@@ -1,0 +1,19 @@
+included:
+  - Rumble
+
+excluded:
+  - RumbleTests
+  - RumbleUITests
+
+# Start permissive — tighten rules over time
+disabled_rules:
+  - trailing_whitespace
+  - line_length         # re-enable once long lines are cleaned up
+
+opt_in_rules:
+  - empty_count
+  - force_unwrapping
+
+# Warn on force_unwrapping rather than error
+force_unwrapping:
+  severity: warning

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+STAGED_SWIFT=$(git diff --cached --name-only --diff-filter=ACM | grep '\.swift$')
+
+[ -z "$STAGED_SWIFT" ] && exit 0
+
+if ! which swiftlint > /dev/null 2>&1; then
+    echo "warning: SwiftLint not installed — skipping. Install with: brew install swiftlint"
+    exit 0
+fi
+
+swiftlint --strict
