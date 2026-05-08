@@ -9,31 +9,34 @@ import SwiftUI
 
 struct EarthquakeRow: View {
     var earthquake: Earthquake
-    
+
     var body: some View {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Magnitude")
-                        .font(.footnote)
-                    Text(preciseRound(earthquake.properties.magnitude, precision: .hundredths))
-                        .font(.title)
-                        .bold()
-                }
-                Spacer()
-                VStack(alignment: .trailing) {
-                    Text(earthquake.properties.date.formatted(date: .abbreviated, time: .shortened))
-                        .font(.caption)
-//                        .foregroundStyle(Color.gray)
-                    Text(earthquake.properties.place ?? "Place")
-                        .font(.subheadline)
-                        .multilineTextAlignment(.trailing)
-                    
-                }
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Magnitude")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Text(preciseRound(earthquake.properties.magnitude, precision: .hundredths))
+                    .font(.title)
+                    .bold()
+                    .foregroundStyle(Color.magnitudeColor(for: earthquake.properties.magnitude))
             }
-            .foregroundStyle(Color.text)
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(earthquake.properties.date.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(earthquake.properties.place ?? "Unknown location")
+                    .font(.subheadline)
+                    .multilineTextAlignment(.trailing)
+            }
+        }
+        .padding(12)
+        .glassEffect(.regular, in: .rect(cornerRadius: 16))
     }
 }
 
 #Preview {
     EarthquakeRow(earthquake: Earthquake.testEarthquake)
+        .padding()
 }

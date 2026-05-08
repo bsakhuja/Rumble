@@ -9,68 +9,71 @@ import SwiftUI
 import MapKit
 
 struct EarthquakesMapView: View {
-    
-    @ObservedObject var state: EarthquakesState
-    @EnvironmentObject var settings: SettingsState
-    
-    var initialMapCameraPosition: MapCameraPosition {
-        MapCameraPosition.userLocation(fallback: .automatic)
-    }
-    
+    @Environment(SettingsState.self) var settings
+    var state: EarthquakesState
+
     @State private var selectedEarthquake: Earthquake?
     @State private var showingEarthquakePreview = false
-    
-    var filteredEarthquakes: [Earthquake]? {
-        state.earthquakes?.filter {
+    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
+
+    var filteredEarthquakes: [Earthquake] {
+        (state.earthquakes ?? []).filter {
             $0.properties.magnitude < Double(settings.magnitudeUpper) &&
             $0.properties.magnitude > Double(settings.magnitudeLower)
         }
     }
-    
+
     var body: some View {
-        if let earthquakes = filteredEarthquakes,
-           earthquakes.count > 0
-        {
-            Map(initialPosition: initialMapCameraPosition,
-                selection: $selectedEarthquake) {
+        if filteredEarthquakes.isEmpty && !state.isLoading {
+            VStack {
+                Spacer()
+                Image(systemName: "waveform.slash")
+                    .font(.system(size: 48))
+                    .foregroundStyle(.secondary)
+                Text("No earthquakes to show").font(.title3.weight(.medium))
+                Text("Try adjusting your search settings").font(.subheadline).foregroundStyle(.secondary)
+                Spacer()
+            }
+        } else {
+            Map(position: $position, selection: $selectedEarthquake) {
                 Marker(item: .forCurrentLocation())
-                ForEach(earthquakes, id: \.self) { result in
-                    Marker(result.properties.title, coordinate: result.geometry.coordinate2D)
-                        .tag(result.id)
+                ForEach(filteredEarthquakes, id: \.self) { quake in
+                    Marker(quake.properties.title, coordinate: quake.geometry.coordinate2D)
+                        .tag(quake.id)
+                        .tint(Color.magnitudeColor(for: quake.properties.magnitude))
                 }
             }
-            .mapControls {
-                MapUserLocationButton()
+            .overlay(alignment: .bottomTrailing) {
+                Button {
+                    withAnimation { position = .userLocation(fallback: .automatic) }
+                } label: {
+                    Image(systemName: "location.fill")
+                        .font(.system(size: 14, weight: .medium))
+                        .padding(12)
+                        .background(.regularMaterial, in: Circle())
+                }
+                .padding(.trailing, 16)
+                .padding(.bottom, 16)
             }
             .onChange(of: selectedEarthquake) {
                 showingEarthquakePreview = selectedEarthquake != nil
             }
             .onChange(of: showingEarthquakePreview) {
-                if !showingEarthquakePreview {
-                    selectedEarthquake = nil
-                }
+                if !showingEarthquakePreview { selectedEarthquake = nil }
             }
             .animation(.easeInOut(duration: 0.3), value: selectedEarthquake)
-            .sheet(isPresented: $showingEarthquakePreview, content: {
-                if let earthquake = selectedEarthquake {
-                    EarthquakePreviewView(earthquake: earthquake)
+            .sheet(isPresented: $showingEarthquakePreview) {
+                if let quake = selectedEarthquake {
+                    EarthquakePreviewView(earthquake: quake)
                         .presentationDetents([.fraction(0.25)])
                         .presentationDragIndicator(.visible)
                 }
-            })
-        } else {
-            VStack {
-                Spacer()
-                Text("No earthquakes to show").font(.title)
-                Text("Try adjusting your search settings").font(.subheadline)
-                Spacer()
             }
-            
         }
-        
     }
 }
 
 #Preview {
     EarthquakesMapView(state: .previewStateDefault)
+        .environment(SettingsState())
 }

@@ -6,82 +6,62 @@
 //
 
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
-    
-    @ObservedObject var state: SettingsState
-    
+    @Environment(SettingsState.self) var settings
+    @State private var notificationPermissionDenied = false
+
     var body: some View {
+        @Bindable var settings = settings
         NavigationStack {
             Form {
-                Section("Date & Time") {
-                    DatePicker("Start date", selection: $state.dateStart, displayedComponents: .date)
-                    DatePicker("End date", selection: $state.dateEnd, displayedComponents: .date)
-                }
-                Section("Magnitude") {
-                    Picker("Minimum magnitude", selection: $state.magnitudeLower) {
-                        ForEach(state.availableMinMagnitudes, id: \.self) { mag in
-                            Text(String(mag))
+                Section("Notifications") {
+                    Toggle("Notify for significant earthquakes", isOn: $settings.notificationsEnabled)
+                        .onChange(of: settings.notificationsEnabled) { _, enabled in
+                            if enabled {
+                                Task {
+                                    let granted = await NotificationManager.shared.requestPermission()
+                                    if !granted {
+                                        settings.notificationsEnabled = false
+                                        notificationPermissionDenied = true
+                                    }
+                                }
+                            }
                         }
-                        
-                    }
-                    Picker("Minimum magnitude", selection: $state.magnitudeUpper) {
-                        ForEach(state.availableMaxMagnitudes, id: \.self) { mag in
-                            Text(String(mag))
-                        }
-                        
-                    }
-                }
-                Section("Sorting") {
-                    Picker("Sort method", selection: $state.sortMethod) {
-                        ForEach(SortMethod.allCases, id: \.self) { sortMethod in
-                            Text(sortMethod.rawValue)
+                    if settings.notificationsEnabled {
+                        Picker("Minimum magnitude", selection: $settings.notificationMinMagnitude) {
+                            ForEach(stride(from: 3.0, through: 8.0, by: 0.5).map { $0 }, id: \.self) { mag in
+                                Text("M\(mag, specifier: "%.1f")+").tag(mag)
+                            }
                         }
                     }
+                    if notificationPermissionDenied {
+                        Button("Open Notification Settings") {
+                            if let url = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(url)
+                            }
+                        }
+                        .foregroundStyle(.blue)
+                    }
                 }
-                //                Section("Location", content: {
-                //                    Text("Sorted by distance")
-                //                    Text("Max distance from location")
-                //                    Text("Location")
-                //                })
-                //                Section("Magnitude", content: {
-                //                    Text("No magnitude filter")
-                //                    Text("Minimum magnitude")
-                //                    Text("Maximum magnitude")
-                //                })
-                //                Section("Location", content: {
-                //                    Text("Sorted by distance")
-                //                    Text("Max distance from location")
-                //                    Text("Location")
-                //                })
-                
+
                 Section("About") {
                     Text("Rumble version \(AppVersionProvider.versionAndBuild)")
                     Text("Made by Brian Sakhuja")
                     Text("Earthquake data from USGS")
                 }
             }
-            .navigationTitle("Search Settings")
-
+            .navigationTitle("Settings")
         }
-        
-        
+        .task {
+            let status = await UNUserNotificationCenter.current().notificationSettings()
+            notificationPermissionDenied = status.authorizationStatus == .denied
+        }
     }
 }
 
-#Preview("Default") {
-    SettingsView(state: SettingsState())
-}
-
-
-enum SortMethod: String, CaseIterable, Identifiable {
-    var id: String { return self.rawValue }
-    
-    case none = "None"
-    case locationAscending = "Location ascending (closest first)"
-    case locationDescending = "Location descending (farthest first)"
-    case magnitudeAscending = "Magnitude ascending (lowest first)"
-    case magnitudeDescending = "Magnitude descending (largest first)"
-    case timeAscending = "Time ascending (oldest first)"
-    case timeDescending = "Time descending (newest first)"
+#Preview {
+    SettingsView()
+        .environment(SettingsState())
 }
