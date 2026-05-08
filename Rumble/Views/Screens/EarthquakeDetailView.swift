@@ -7,26 +7,21 @@
 
 import SwiftUI
 import MapKit
-import WebKit
 
 struct EarthquakeDetailView: View {
-    
-    @EnvironmentObject var settings: SettingsState
+    @Environment(SettingsState.self) var settings
     let earthquake: Earthquake
-    
+
     var body: some View {
         List {
-            
-            // MARK: - Specifics
-            
             Section("Earthquake specifics") {
-                HStack {
-                    Text(earthquake.properties.title)
-                }
+                Text(earthquake.properties.title)
                 HStack {
                     Text("Magnitude")
                     Spacer()
                     Text(preciseRound(earthquake.properties.magnitude, precision: .hundredths))
+                        .bold()
+                        .foregroundStyle(Color.magnitudeColor(for: earthquake.properties.magnitude))
                 }
                 HStack {
                     Text("Date & Time")
@@ -38,36 +33,31 @@ struct EarthquakeDetailView: View {
                         Text("Tsunami warning")
                         Spacer()
                         Text(tsunami ? "Yes" : "No")
+                            .foregroundStyle(tsunami ? .red : .secondary)
                     }
                 }
             }
-            
-            // MARK: - Location
-            
+
             Section("Location") {
                 if let place = earthquake.properties.place {
                     Text(place)
                 }
-                
                 NavigationLink("View on map") {
                     Map(initialPosition: earthquake.geometry.mapCameraPosition) {
-                        Marker(earthquake.properties.place ?? "Place", coordinate: earthquake.geometry.coordinate2D)
+                        Marker(earthquake.properties.place ?? "Earthquake", coordinate: earthquake.geometry.coordinate2D)
+                            .tint(Color.magnitudeColor(for: earthquake.properties.magnitude))
                     }
                     .navigationTitle("Earthquake location")
                 }
-                
                 if let location = settings.userLocation {
                     HStack {
                         Text("Distance from you")
                         Spacer()
-                        Text("\((Int(earthquake.geometry.clLocation.distance(from: location)/1000))) km")
+                        Text("\(Int(earthquake.geometry.clLocation.distance(from: location) / 1000)) km")
                     }
-                    
                 }
             }
-            
-            // MARK: - Extra
-            
+
             Section("Extra") {
                 if let url = earthquake.properties.url {
                     HStack {
@@ -75,9 +65,7 @@ struct EarthquakeDetailView: View {
                         Spacer()
                         Link("View on USGS", destination: url)
                     }
-                    
                 }
-                
                 if let didYouFeelItURL = earthquake.properties.didYouFeelItUrl {
                     HStack {
                         Text("Did you feel it?")
@@ -92,6 +80,8 @@ struct EarthquakeDetailView: View {
 }
 
 #Preview {
-    EarthquakeDetailView(earthquake: Earthquake.testEarthquake)
-        .environmentObject(SettingsState())
+    NavigationStack {
+        EarthquakeDetailView(earthquake: Earthquake.testEarthquake)
+            .environment(SettingsState())
+    }
 }
