@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "unit-tests",
+      "name" : "Unit Tests",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Rumble.xcodeproj",
+        "identifier" : "06EFE9C22AFAB92000351973",
+        "name" : "RumbleTests"
+      }
+    }
+  ],
+  "version" : 1
+}
