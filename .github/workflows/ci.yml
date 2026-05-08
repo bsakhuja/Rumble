@@ -29,6 +29,7 @@ jobs:
             -scheme Rumble \
             -destination "id=$SIM_UDID" \
             -configuration Debug \
+            -skip-testing:RumbleUITests \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Test
@@ -37,5 +38,5 @@ jobs:
             -project Rumble.xcodeproj \
             -scheme Rumble \
             -destination "id=$SIM_UDID" \
-            -only-testing:RumbleTests \
+            -skip-testing:RumbleUITests \
             CODE_SIGNING_ALLOWED=NO
