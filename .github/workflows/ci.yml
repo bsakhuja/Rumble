@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project Rumble.xcodeproj \
+            -scheme Rumble \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Test
+        run: |
+          xcodebuild test \
+            -project Rumble.xcodeproj \
+            -scheme Rumble \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -only-testing:RumbleTests \
+            CODE_SIGNING_ALLOWED=NO
