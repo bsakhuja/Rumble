@@ -7,45 +7,49 @@
 
 import Foundation
 import CoreLocation
+import Observation
 
-class LocationState: NSObject, CLLocationManagerDelegate, ObservableObject {
-    
-    @Published var authorizationStatus: CLAuthorizationStatus?
-    
-    var locationManager = CLLocationManager()
-    
-    override init() {
-        super.init()
-        locationManager.delegate = self
+@Observable
+@MainActor
+final class LocationState {
+    var authorizationStatus: CLAuthorizationStatus?
+    let locationManager = CLLocationManager()
+
+    private var delegate: LocationDelegate?
+
+    init() {
+        let d = LocationDelegate(state: self)
+        self.delegate = d
+        locationManager.delegate = d
     }
-    
+}
+
+private final class LocationDelegate: NSObject, CLLocationManagerDelegate {
+    weak var state: LocationState?
+
+    init(state: LocationState) {
+        self.state = state
+    }
+
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        authorizationStatus = manager.authorizationStatus
-        
-        switch manager.authorizationStatus {
-        case .authorizedWhenInUse:  // Location services are available.
-            // Insert code here of what should happen when Location services are authorized
-            locationManager.requestLocation()
-            break
-            
-        case .restricted, .denied:  // Location services currently unavailable.
-            // Insert code here of what should happen when Location services are NOT authorized
-            break
-            
-        case .notDetermined:        // Authorization not determined yet.
+        let status = manager.authorizationStatus
+        let state = self.state
+        Task { @MainActor in
+            state?.authorizationStatus = status
+        }
+        switch status {
+        case .authorizedWhenInUse:
+            manager.requestLocation()
+        case .notDetermined:
             manager.requestWhenInUseAuthorization()
-            break
-            
         default:
             break
         }
     }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // Insert code to handle location updates
-    }
-    
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {}
+
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("error: \(error.localizedDescription)")
+        print("Location error: \(error.localizedDescription)")
     }
 }

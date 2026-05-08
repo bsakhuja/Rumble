@@ -6,48 +6,52 @@
 //
 
 import Foundation
-import Combine
-import SwiftUI
+import Observation
 
-class EarthquakesState: ObservableObject {
-    private var cancellables = Set<AnyCancellable>()
+@Observable
+@MainActor
+final class EarthquakesState {
     let earthquakeService: EarthquakeServiceProtocol
-    @Published var earthquakes: [Earthquake]?
-    @Published var isLoading: Bool = true
-    @Published var shouldShowFloatingButton: Bool = true
-    
-    @EnvironmentObject var settings: SettingsState
-    
-    init(earthquakeService: EarthquakeServiceProtocol) {
+    var earthquakes: [Earthquake]?
+    var isLoading: Bool = true
+    var error: Error?
+
+    private var fetchTask: Task<Void, Never>?
+
+    init(earthquakeService: EarthquakeServiceProtocol = EarthquakeService()) {
         self.earthquakeService = earthquakeService
     }
-    
+
     func fetchEarthquakes(startTime: Date, endTime: Date) {
+        fetchTask?.cancel()
+        error = nil
         isLoading = true
-        earthquakeService.getEarthquakes(startTime: startTime, endTime: endTime)
-            .receive(on: RunLoop.main)
-            .sink(receiveCompletion: { data in
-            
-        }, receiveValue: { [weak self] data in
-            self?.earthquakes = data.earthquakes
-            self?.isLoading = false
-        }).store(in: &cancellables)
+        fetchTask = Task {
+            do {
+                let result = try await earthquakeService.getEarthquakes(startTime: startTime, endTime: endTime)
+                guard !Task.isCancelled else { return }
+                earthquakes = result.earthquakes
+                isLoading = false
+            } catch {
+                guard !Task.isCancelled else { return }
+                self.error = error
+                isLoading = false
+            }
+        }
     }
-    
+
     // MARK: - Preview States
-    
+
     static var previewStateDefault: EarthquakesState = {
-        var state = EarthquakesState(earthquakeService: EarthquakeService())
-        state.earthquakes = [
-            Earthquake.testEarthquake
-        ]
+        let state = EarthquakesState()
+        state.earthquakes = [Earthquake.testEarthquake]
+        state.isLoading = false
         return state
     }()
-    
+
     static var previewStateLoading: EarthquakesState = {
-        var state = EarthquakesState(earthquakeService: EarthquakeService())
+        let state = EarthquakesState()
         state.isLoading = true
         return state
     }()
-    
 }

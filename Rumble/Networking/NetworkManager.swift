@@ -6,114 +6,83 @@
 //
 
 import Foundation
-import Combine
 
-// https://medium.com/@islammoussa.eg/swiftui-and-combine-building-a-solid-network-layer-for-handling-api-requests-5ccce878212a
-
-protocol APIEndpoint {
-    var baseURL: URL { get }
-    var path: String { get }
-    var method: HTTPMethod { get }
-    var headers: [String: String]? { get }
-    var parameters: [String: Any]? { get }
-}
-
-enum HTTPMethod: String {
-    case get = "GET"
-    case post = "POST"
-    case put = "PUT"
-    case patch = "PATCH"
-    case delete = "DELETE"
-}
-
-enum APIError: Error {
-    case invalidResponse
+enum APIError: Error, LocalizedError {
+    case invalidResponse(Int)
     case invalidData
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse(let code): return "Server returned an unexpected response (\(code))."
+        case .invalidData: return "The earthquake data could not be read."
+        }
+    }
 }
 
-protocol APIClient {
-    associatedtype EndpointType: APIEndpoint
-    func request<T: Decodable>(_ endpoint: EndpointType) -> AnyPublisher<T, Error>
-}
-
-enum EarthquakeEndpoint: APIEndpoint {
+enum EarthquakeEndpoint {
     case query(startTime: String, endTime: String)
-    
-    var baseURL: URL {
-        return URL(string: "https://earthquake.usgs.gov/fdsnws/event/1")!
-    }
-    
-    var path: String {
-        switch self {
-        case .query:
-            return "/query"
-        }
-    }
-    
-    var method: HTTPMethod {
-        switch self {
-        case .query:
-            return .get
-        }
-    }
-    
-    var headers: [String: String]? {
-        switch self {
-        case .query:
-            return ["Authorization": "Bearer TOKEN"]
-        }
-    }
-    
-    var parameters: [String: Any]? {
+
+    var url: URL {
+        var components = URLComponents(string: "https://earthquake.usgs.gov/fdsnws/event/1/query")!
         switch self {
         case .query(let startTime, let endTime):
-            return ["format": "geojson", "starttime": startTime, "endtime": endTime]
+            components.queryItems = [
+                URLQueryItem(name: "format", value: "geojson"),
+                URLQueryItem(name: "starttime", value: startTime),
+                URLQueryItem(name: "endtime", value: endTime),
+            ]
         }
+        return components.url!
     }
 }
 
-class URLSessionAPIClient<EndpointType: APIEndpoint>: APIClient {
-    func request<T: Decodable>(_ endpoint: EndpointType) -> AnyPublisher<T, Error> {
-        let url = endpoint.baseURL.appendingPathComponent(endpoint.path)
-        var request = URLRequest(url: url)
-        request.httpMethod = endpoint.method.rawValue
-        
-        endpoint.headers?.forEach { request.addValue($0.value, forHTTPHeaderField: $0.key) }
-        
-        endpoint.parameters?.forEach { parameter in
-            request.url?.append(queryItems: [
-                URLQueryItem(name: parameter.key, value: "\(parameter.value)")
-            ])
-        }
-        
-        return URLSession.shared.dataTaskPublisher(for: request)
-            .subscribe(on: DispatchQueue.global(qos: .background))
-            .tryMap { data, response -> Data in
-                guard let httpResponse = response as? HTTPURLResponse,
-                      (200...299).contains(httpResponse.statusCode) else {
-                    throw APIError.invalidResponse
-                }
-                return data
+struct NetworkClient {
+    private let session: URLSession
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+
+    func fetch<T: Decodable>(_ endpoint: EarthquakeEndpoint) async throws -> T {
+        var request = URLRequest(url: endpoint.url, cachePolicy: .returnCacheDataElseLoad)
+        request.httpMethod = "GET"
+
+        let maxRetries = 2
+        var lastError: Error = APIError.invalidData
+        for attempt in 0...maxRetries {
+            do {
+                let (data, response) = try await session.data(for: request)
+                guard let http = response as? HTTPURLResponse else { throw APIError.invalidResponse(0) }
+                guard (200...299).contains(http.statusCode) else { throw APIError.invalidResponse(http.statusCode) }
+                return try JSONDecoder().decode(T.self, from: data)
+            } catch let urlError as URLError where attempt < maxRetries {
+                lastError = urlError
+                let delay: UInt64 = attempt == 0 ? 500_000_000 : 1_000_000_000
+                try await Task.sleep(nanoseconds: delay)
+            } catch {
+                throw error
             }
-            .decode(type: T.self, decoder: JSONDecoder())
-            .eraseToAnyPublisher()
+        }
+        throw lastError
     }
 }
 
-protocol EarthquakeServiceProtocol {
-    func getEarthquakes(startTime: Date, endTime: Date) -> AnyPublisher<GeoJSON, Error>
+protocol EarthquakeServiceProtocol: Sendable {
+    func getEarthquakes(startTime: Date, endTime: Date) async throws -> GeoJSON
 }
 
-class EarthquakeService: EarthquakeServiceProtocol {
-    let apiClient = URLSessionAPIClient<EarthquakeEndpoint>()
-    
-    func getEarthquakes(startTime: Date, endTime: Date) -> AnyPublisher<GeoJSON, Error> {
-        let dateFormatter = DateFormatter()
-        dateFormatter.timeStyle = .none
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        
-        let startTimeString = dateFormatter.string(from: startTime)
-        let endTimeString = dateFormatter.string(from: endTime.dayAfter)
-        return apiClient.request(.query(startTime: startTimeString, endTime: endTimeString))
+struct EarthquakeService: EarthquakeServiceProtocol {
+    private let client = NetworkClient()
+
+    private let dateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
+
+    func getEarthquakes(startTime: Date, endTime: Date) async throws -> GeoJSON {
+        let start = dateFormatter.string(from: startTime)
+        let end = dateFormatter.string(from: endTime.dayAfter)
+        return try await client.fetch(.query(startTime: start, endTime: end))
     }
 }

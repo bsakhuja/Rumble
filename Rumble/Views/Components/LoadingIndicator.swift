@@ -8,19 +8,15 @@
 import SwiftUI
 
 struct LoadingIndicator: View {
-    
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 8)
-                .opacity(0.2)
-            VStack(spacing: 20) {
-                ProgressView()
-                Text("Loading...")
-                    .foregroundStyle(Color.gray)
-            }
+        VStack(spacing: 16) {
+            ProgressView()
+                .controlSize(.large)
+            Text("Loading...")
+                .foregroundStyle(.secondary)
         }
-        .frame(width: 100, height: 100)
-        
+        .padding(24)
+        .glassEffect(.regular, in: .rect(cornerRadius: 16))
     }
 }
 
