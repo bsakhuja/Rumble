@@ -10,11 +10,13 @@ import Foundation
 enum APIError: Error, LocalizedError {
     case invalidResponse(Int)
     case invalidData
+    case invalidURL
 
     var errorDescription: String? {
         switch self {
         case .invalidResponse(let code): return "Server returned an unexpected response (\(code))."
         case .invalidData: return "The earthquake data could not be read."
+        case .invalidURL: return "The request URL could not be constructed."
         }
     }
 }
@@ -22,9 +24,10 @@ enum APIError: Error, LocalizedError {
 enum EarthquakeEndpoint {
     case query(startTime: String, endTime: String)
 
-    var url: URL {
-        // swiftlint:disable:next force_unwrapping
-        var components = URLComponents(string: "https://earthquake.usgs.gov/fdsnws/event/1/query")!
+    func buildURL() throws -> URL {
+        guard var components = URLComponents(string: "https://earthquake.usgs.gov/fdsnws/event/1/query") else {
+            throw APIError.invalidURL
+        }
         switch self {
         case .query(let startTime, let endTime):
             components.queryItems = [
@@ -33,8 +36,10 @@ enum EarthquakeEndpoint {
                 URLQueryItem(name: "endtime", value: endTime)
             ]
         }
-        // swiftlint:disable:next force_unwrapping
-        return components.url!
+        guard let url = components.url else {
+            throw APIError.invalidURL
+        }
+        return url
     }
 }
 
@@ -46,7 +51,7 @@ struct NetworkClient {
     }
 
     func fetch<T: Decodable>(_ endpoint: EarthquakeEndpoint) async throws -> T {
-        var request = URLRequest(url: endpoint.url, cachePolicy: .returnCacheDataElseLoad)
+        var request = URLRequest(url: try endpoint.buildURL(), cachePolicy: .returnCacheDataElseLoad)
         request.httpMethod = "GET"
 
         let maxRetries = 2
