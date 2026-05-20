@@ -22,13 +22,18 @@ final class EarthquakesState {
         self.earthquakeService = earthquakeService
     }
 
-    func fetchEarthquakes(startTime: Date, endTime: Date) {
+    func fetchEarthquakes(startTime: Date, endTime: Date, minMagnitude: Int, maxMagnitude: Int) {
         fetchTask?.cancel()
         error = nil
         isLoading = true
         fetchTask = Task {
             do {
-                let result = try await earthquakeService.getEarthquakes(startTime: startTime, endTime: endTime)
+                let result = try await earthquakeService.getEarthquakes(
+                    startTime: startTime,
+                    endTime: endTime,
+                    minMagnitude: minMagnitude,
+                    maxMagnitude: maxMagnitude
+                )
                 guard !Task.isCancelled else { return }
                 earthquakes = result.earthquakes
                 isLoading = false

@@ -38,12 +38,38 @@ struct HomeView: View {
             }
             .onAppear {
                 if isInitialLoad {
-                    state.fetchEarthquakes(startTime: settings.dateStart, endTime: settings.dateEnd)
+                    state.fetchEarthquakes(
+                        startTime: settings.dateStart,
+                        endTime: settings.dateEnd,
+                        minMagnitude: settings.magnitudeLower,
+                        maxMagnitude: settings.magnitudeUpper
+                    )
                     isInitialLoad = false
                 }
             }
             .onChange(of: settings.dateRangeDays) {
-                state.fetchEarthquakes(startTime: settings.dateStart, endTime: settings.dateEnd)
+                state.fetchEarthquakes(
+                    startTime: settings.dateStart,
+                    endTime: settings.dateEnd,
+                    minMagnitude: settings.magnitudeLower,
+                    maxMagnitude: settings.magnitudeUpper
+                )
+            }
+            .onChange(of: settings.magnitudeLower) {
+                state.fetchEarthquakes(
+                    startTime: settings.dateStart,
+                    endTime: settings.dateEnd,
+                    minMagnitude: settings.magnitudeLower,
+                    maxMagnitude: settings.magnitudeUpper
+                )
+            }
+            .onChange(of: settings.magnitudeUpper) {
+                state.fetchEarthquakes(
+                    startTime: settings.dateStart,
+                    endTime: settings.dateEnd,
+                    minMagnitude: settings.magnitudeLower,
+                    maxMagnitude: settings.magnitudeUpper
+                )
             }
             .navigationTitle("Earthquakes")
             .navigationBarTitleDisplayMode(.inline)
@@ -72,7 +98,12 @@ struct HomeView: View {
                 set: { if !$0 { state.error = nil } }
             )) {
                 Button("Retry") {
-                    state.fetchEarthquakes(startTime: settings.dateStart, endTime: settings.dateEnd)
+                    state.fetchEarthquakes(
+                        startTime: settings.dateStart,
+                        endTime: settings.dateEnd,
+                        minMagnitude: settings.magnitudeLower,
+                        maxMagnitude: settings.magnitudeUpper
+                    )
                 }
                 Button("Cancel", role: .cancel) {
                     state.error = nil

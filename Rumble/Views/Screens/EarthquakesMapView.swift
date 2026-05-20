@@ -9,22 +9,16 @@ import SwiftUI
 import MapKit
 
 struct EarthquakesMapView: View {
-    @Environment(SettingsState.self) var settings
     var state: EarthquakesState
 
     @State private var selectedEarthquake: Earthquake?
     @State private var showingEarthquakePreview = false
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
 
-    var filteredEarthquakes: [Earthquake] {
-        (state.earthquakes ?? []).filter {
-            $0.properties.magnitude < Double(settings.magnitudeUpper) &&
-            $0.properties.magnitude > Double(settings.magnitudeLower)
-        }
-    }
+    var earthquakes: [Earthquake] { state.earthquakes ?? [] }
 
     var body: some View {
-        if filteredEarthquakes.isEmpty && !state.isLoading {
+        if earthquakes.isEmpty && !state.isLoading {
             VStack {
                 Spacer()
                 Image(systemName: "waveform.slash")
@@ -37,7 +31,7 @@ struct EarthquakesMapView: View {
         } else {
             Map(position: $position, selection: $selectedEarthquake) {
                 Marker(item: .forCurrentLocation())
-                ForEach(filteredEarthquakes, id: \.self) { quake in
+                ForEach(earthquakes, id: \.self) { quake in
                     Marker(quake.properties.title, coordinate: quake.geometry.coordinate2D)
                         .tag(quake.id)
                         .tint(Color.magnitudeColor(for: quake.properties.magnitude))
@@ -75,5 +69,4 @@ struct EarthquakesMapView: View {
 
 #Preview {
     EarthquakesMapView(state: .previewStateDefault)
-        .environment(SettingsState())
 }

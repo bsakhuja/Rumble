@@ -22,19 +22,24 @@ enum APIError: Error, LocalizedError {
 }
 
 enum EarthquakeEndpoint {
-    case query(startTime: String, endTime: String)
+    case query(startTime: String, endTime: String, minMagnitude: Int, maxMagnitude: Int)
 
     func buildURL() throws -> URL {
         guard var components = URLComponents(string: "https://earthquake.usgs.gov/fdsnws/event/1/query") else {
             throw APIError.invalidURL
         }
         switch self {
-        case .query(let startTime, let endTime):
-            components.queryItems = [
+        case .query(let startTime, let endTime, let minMagnitude, let maxMagnitude):
+            var items: [URLQueryItem] = [
                 URLQueryItem(name: "format", value: "geojson"),
                 URLQueryItem(name: "starttime", value: startTime),
-                URLQueryItem(name: "endtime", value: endTime)
+                URLQueryItem(name: "endtime", value: endTime),
+                URLQueryItem(name: "minmagnitude", value: "\(minMagnitude)")
             ]
+            if maxMagnitude < 10 {
+                items.append(URLQueryItem(name: "maxmagnitude", value: "\(maxMagnitude)"))
+            }
+            components.queryItems = items
         }
         guard let url = components.url else {
             throw APIError.invalidURL
@@ -75,7 +80,7 @@ struct NetworkClient {
 }
 
 protocol EarthquakeServiceProtocol: Sendable {
-    func getEarthquakes(startTime: Date, endTime: Date) async throws -> GeoJSON
+    func getEarthquakes(startTime: Date, endTime: Date, minMagnitude: Int, maxMagnitude: Int) async throws -> GeoJSON
 }
 
 struct EarthquakeService: EarthquakeServiceProtocol {
@@ -87,9 +92,9 @@ struct EarthquakeService: EarthquakeServiceProtocol {
         return formatter
     }()
 
-    func getEarthquakes(startTime: Date, endTime: Date) async throws -> GeoJSON {
+    func getEarthquakes(startTime: Date, endTime: Date, minMagnitude: Int, maxMagnitude: Int) async throws -> GeoJSON {
         let start = dateFormatter.string(from: startTime)
         let end = dateFormatter.string(from: endTime.dayAfter)
-        return try await client.fetch(.query(startTime: start, endTime: end))
+        return try await client.fetch(.query(startTime: start, endTime: end, minMagnitude: minMagnitude, maxMagnitude: maxMagnitude))
     }
 }
