@@ -16,7 +16,8 @@ struct RumbleApp: App {
     init() {
         URLCache.shared = URLCache(memoryCapacity: 10 * 1024 * 1024, diskCapacity: 50 * 1024 * 1024)
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.rumble.earthquake-check", using: nil) { task in
-            NotificationManager.shared.handleBackgroundRefresh(task: task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else { return }
+            NotificationManager.shared.handleBackgroundRefresh(task: refreshTask)
         }
     }
 

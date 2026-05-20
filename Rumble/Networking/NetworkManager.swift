@@ -23,15 +23,17 @@ enum EarthquakeEndpoint {
     case query(startTime: String, endTime: String)
 
     var url: URL {
+        // swiftlint:disable:next force_unwrapping
         var components = URLComponents(string: "https://earthquake.usgs.gov/fdsnws/event/1/query")!
         switch self {
         case .query(let startTime, let endTime):
             components.queryItems = [
                 URLQueryItem(name: "format", value: "geojson"),
                 URLQueryItem(name: "starttime", value: startTime),
-                URLQueryItem(name: "endtime", value: endTime),
+                URLQueryItem(name: "endtime", value: endTime)
             ]
         }
+        // swiftlint:disable:next force_unwrapping
         return components.url!
     }
 }
@@ -75,9 +77,9 @@ struct EarthquakeService: EarthquakeServiceProtocol {
     private let client = NetworkClient()
 
     private let dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        return f
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
     }()
 
     func getEarthquakes(startTime: Date, endTime: Date) async throws -> GeoJSON {

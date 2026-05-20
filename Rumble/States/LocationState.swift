@@ -18,9 +18,9 @@ final class LocationState {
     private var delegate: LocationDelegate?
 
     init() {
-        let d = LocationDelegate(state: self)
-        self.delegate = d
-        locationManager.delegate = d
+        let locationDelegate = LocationDelegate(state: self)
+        self.delegate = locationDelegate
+        locationManager.delegate = locationDelegate
     }
 }
 
