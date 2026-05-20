@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import UserNotifications
+@preconcurrency import UserNotifications
 import BackgroundTasks
 
 @MainActor

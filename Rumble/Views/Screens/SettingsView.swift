@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import UserNotifications
+@preconcurrency import UserNotifications
 
 struct SettingsView: View {
     @Environment(SettingsState.self) var settings
