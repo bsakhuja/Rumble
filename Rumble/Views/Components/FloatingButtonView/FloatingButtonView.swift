@@ -10,7 +10,7 @@ import SwiftUI
 struct FloatingButtonView: View {
     let imageName: String
     let action: () -> Void
-    
+
     var body: some View {
         Button {
             action()
@@ -18,10 +18,7 @@ struct FloatingButtonView: View {
             Image(systemName: imageName)
                 .font(.title.weight(.semibold))
                 .padding()
-                .background(Color.accentColor)
-                .foregroundColor(Color.floatingButtonForeground)
-                .clipShape(Circle())
-                .shadow(radius: 4, x: 0, y: 4)
+                .glassEffect(.regular, in: Circle())
         }
     }
 }
