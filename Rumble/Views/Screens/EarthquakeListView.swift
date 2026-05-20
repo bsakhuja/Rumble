@@ -14,27 +14,23 @@ struct EarthquakeListView: View {
 
     var filteredEarthquakes: [Earthquake] {
         let base = state.earthquakes ?? []
-        let magnitudeFiltered = base.filter {
-            $0.properties.magnitude < Double(settings.magnitudeUpper) &&
-            $0.properties.magnitude > Double(settings.magnitudeLower)
-        }
         switch settings.sortMethod {
         case .none:
-            return magnitudeFiltered
+            return base
         case .locationAscending:
-            guard let loc = settings.userLocation else { return magnitudeFiltered }
-            return magnitudeFiltered.sorted { $0.geometry.clLocation.distance(from: loc) < $1.geometry.clLocation.distance(from: loc) }
+            guard let loc = settings.userLocation else { return base }
+            return base.sorted { $0.geometry.clLocation.distance(from: loc) < $1.geometry.clLocation.distance(from: loc) }
         case .locationDescending:
-            guard let loc = settings.userLocation else { return magnitudeFiltered }
-            return magnitudeFiltered.sorted { $0.geometry.clLocation.distance(from: loc) > $1.geometry.clLocation.distance(from: loc) }
+            guard let loc = settings.userLocation else { return base }
+            return base.sorted { $0.geometry.clLocation.distance(from: loc) > $1.geometry.clLocation.distance(from: loc) }
         case .magnitudeAscending:
-            return magnitudeFiltered.sorted { $0.properties.magnitude < $1.properties.magnitude }
+            return base.sorted { $0.properties.magnitude < $1.properties.magnitude }
         case .magnitudeDescending:
-            return magnitudeFiltered.sorted { $0.properties.magnitude > $1.properties.magnitude }
+            return base.sorted { $0.properties.magnitude > $1.properties.magnitude }
         case .timeAscending:
-            return magnitudeFiltered.sorted { $0.properties.time < $1.properties.time }
+            return base.sorted { $0.properties.time < $1.properties.time }
         case .timeDescending:
-            return magnitudeFiltered.sorted { $0.properties.time > $1.properties.time }
+            return base.sorted { $0.properties.time > $1.properties.time }
         }
     }
 
@@ -60,7 +56,12 @@ struct EarthquakeListView: View {
             .padding(.vertical, 8)
         }
         .refreshable {
-            state.fetchEarthquakes(startTime: settings.dateStart, endTime: settings.dateEnd)
+            state.fetchEarthquakes(
+                startTime: settings.dateStart,
+                endTime: settings.dateEnd,
+                minMagnitude: settings.magnitudeLower,
+                maxMagnitude: settings.magnitudeUpper
+            )
         }
     }
 

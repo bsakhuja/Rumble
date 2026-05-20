@@ -8,9 +8,13 @@
 import Foundation
 
 struct GeoJSON: Decodable {
-    
+
     private(set) var earthquakes: [Earthquake] = [] // AKA "features"
-    
+
+    init(earthquakes: [Earthquake] = []) {
+        self.earthquakes = earthquakes
+    }
+
     private enum RootCodingKeys: String, CodingKey {
         case features
     }

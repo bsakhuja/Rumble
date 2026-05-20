@@ -50,9 +50,14 @@ final class NotificationManager {
                 let service = EarthquakeService()
                 let endTime = Date()
                 let startTime = endTime.addingTimeInterval(-3600)
-                let geoJSON = try await service.getEarthquakes(startTime: startTime, endTime: endTime)
                 let minMag = UserDefaults.standard.double(forKey: "notificationMinMagnitude")
                 let threshold = minMag > 0 ? minMag : 5.0
+                let geoJSON = try await service.getEarthquakes(
+                    startTime: startTime,
+                    endTime: endTime,
+                    minMagnitude: Int(threshold),
+                    maxMagnitude: 10
+                )
                 pruneOldNotifiedIDs(earthquakes: geoJSON.earthquakes)
                 let notifiedIDs = Set(notifiedEarthquakeIDs())
                 for quake in geoJSON.earthquakes where quake.properties.magnitude >= threshold {
