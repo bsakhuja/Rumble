@@ -17,6 +17,7 @@ struct EarthquakesMapView: View {
     @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
     @State private var boundaries: [PlateBoundarySegment] = []
     @State private var plates: [TectonicPlate] = []
+    @State private var mapStyle: MapStyleOption = .standard
 
     var earthquakes: [Earthquake] { state.earthquakes ?? [] }
 
@@ -77,22 +78,34 @@ struct EarthquakesMapView: View {
                         .tint(Color.magnitudeColor(for: quake.properties.magnitude))
                 }
             }
+            .mapStyle(mapStyle.resolved)
             .overlay(alignment: .bottomTrailing) {
-                Button {
-                    withAnimation { position = .userLocation(fallback: .automatic) }
-                } label: {
-                    Image(systemName: "location.fill")
-                        .font(.system(size: 14, weight: .medium))
-                        .padding(12)
-                        .background(.regularMaterial, in: Circle())
+                VStack(spacing: 10) {
+                    Button {
+                        withAnimation { mapStyle = mapStyle.next }
+                    } label: {
+                        Image(systemName: mapStyle.iconName)
+                            .font(.system(size: 14, weight: .medium))
+                            .padding(12)
+                            .background(.regularMaterial, in: Circle())
+                    }
+                    Button {
+                        withAnimation { position = .userLocation(fallback: .automatic) }
+                    } label: {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 14, weight: .medium))
+                            .padding(12)
+                            .background(.regularMaterial, in: Circle())
+                    }
                 }
                 .padding(.trailing, 16)
                 .padding(.bottom, 16)
             }
-            .overlay(alignment: .bottomLeading) {
+            .overlay(alignment: .topLeading) {
                 if settings.showPlateBoundaries {
                     BoundaryTypeLegend()
-                        .padding(16)
+                        .padding(.leading, 16)
+                        .padding(.top, 8)
                 }
             }
             .onChange(of: selectedEarthquake) {
@@ -118,6 +131,39 @@ struct EarthquakesMapView: View {
         }
     }
 }
+
+// MARK: - Map Style
+
+private enum MapStyleOption: String, CaseIterable {
+    case standard
+    case satellite
+    case hybrid
+
+    var resolved: MapStyle {
+        switch self {
+        case .standard: return .standard
+        case .satellite: return .imagery
+        case .hybrid: return .hybrid
+        }
+    }
+
+    var iconName: String {
+        switch self {
+        case .standard: return "globe.americas"
+        case .satellite: return "mountain.2"
+        case .hybrid: return "square.stack.3d.up"
+        }
+    }
+
+    var next: MapStyleOption {
+        let all = MapStyleOption.allCases
+        let idx = all.firstIndex(of: self) ?? all.startIndex
+        let nextIdx = all.index(after: idx)
+        return nextIdx < all.endIndex ? all[nextIdx] : all[0]
+    }
+}
+
+// MARK: - Legend
 
 private struct BoundaryTypeLegend: View {
     var body: some View {
