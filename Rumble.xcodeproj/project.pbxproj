@@ -42,6 +42,10 @@
 		06EFE9F32AFAC2AD00351973 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EFE9F22AFAC2AD00351973 /* TestData.swift */; };
 		AABB0001AABB0001AABB0001 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0002AABB0001AABB0001 /* Color.swift */; };
 		AABB0003AABB0001AABB0001 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0004AABB0001AABB0001 /* NotificationManager.swift */; };
+		AABB0007AABB0001AABB0001 /* TectonicPlates.json in Resources */ = {isa = PBXBuildFile; fileRef = AABB0006AABB0001AABB0001 /* TectonicPlates.json */; };
+		AABB0010AABB0001AABB0001 /* TectonicBoundaryTypes.json in Resources */ = {isa = PBXBuildFile; fileRef = AABB000FAABB0001AABB0001 /* TectonicBoundaryTypes.json */; };
+		AABB000AAABB0001AABB0001 /* TectonicPlate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0009AABB0001AABB0001 /* TectonicPlate.swift */; };
+		AABB000CAABB0001AABB0001 /* TectonicPlateLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000BAABB0001AABB0001 /* TectonicPlateLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +105,10 @@
 		06EFE9F22AFAC2AD00351973 /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		AABB0002AABB0001AABB0001 /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		AABB0004AABB0001AABB0001 /* NotificationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		AABB0006AABB0001AABB0001 /* TectonicPlates.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = TectonicPlates.json; sourceTree = "<group>"; };
+		AABB000FAABB0001AABB0001 /* TectonicBoundaryTypes.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = TectonicBoundaryTypes.json; sourceTree = "<group>"; };
+		AABB0009AABB0001AABB0001 /* TectonicPlate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TectonicPlate.swift; sourceTree = "<group>"; };
+		AABB000BAABB0001AABB0001 /* TectonicPlateLoader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TectonicPlateLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +144,8 @@
 				06D24C5E2BE805A30092B445 /* EarthquakeProperties.swift */,
 				06D24C5F2BE805A30092B445 /* GeoJSON.swift */,
 				06D24C602BE805A30092B445 /* QuakeLocation.swift */,
+				AABB0009AABB0001AABB0001 /* TectonicPlate.swift */,
+				AABB000BAABB0001AABB0001 /* TectonicPlateLoader.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -251,6 +261,7 @@
 				06D24C802BE805A30092B445 /* Assets.xcassets */,
 				06D24C812BE805A30092B445 /* RumbleApp.swift */,
 				06D24C822BE805A30092B445 /* HomeView.swift */,
+				AABB0008AABB0001AABB0001 /* Resources */,
 			);
 			path = Rumble;
 			sourceTree = "<group>";
@@ -303,6 +314,15 @@
 		};
 /* End PBXGroup section */
 
+		AABB0008AABB0001AABB0001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AABB0006AABB0001AABB0001 /* TectonicPlates.json */,
+				AABB000FAABB0001AABB0001 /* TectonicBoundaryTypes.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* Begin PBXNativeTarget section */
 		06EFE9B22AFAB91E00351973 /* Rumble */ = {
 			isa = PBXNativeTarget;
@@ -410,6 +430,8 @@
 				06D24C8D2BE805A30092B445 /* Preview Assets.xcassets in Resources */,
 				06D24C9E2BE805A30092B445 /* Assets.xcassets in Resources */,
 				06D24C8C2BE805A30092B445 /* testresponse.json in Resources */,
+				AABB0007AABB0001AABB0001 /* TectonicPlates.json in Resources */,
+				AABB0010AABB0001AABB0001 /* TectonicBoundaryTypes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,6 +504,8 @@
 				06D24C852BE805A30092B445 /* Earthquake.swift in Sources */,
 				06D24C9D2BE805A30092B445 /* SettingsView.swift in Sources */,
 				AABB0001AABB0001AABB0001 /* Color.swift in Sources */,
+				AABB000AAABB0001AABB0001 /* TectonicPlate.swift in Sources */,
+				AABB000CAABB0001AABB0001 /* TectonicPlateLoader.swift in Sources */,
 				AABB0003AABB0001AABB0001 /* NotificationManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -646,7 +670,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 311;
+				CURRENT_PROJECT_VERSION = 313;
 				DEVELOPMENT_ASSET_PATHS = "\"Rumble/Preview Content\"";
 				DEVELOPMENT_TEAM = TAK496UJ6Z;
 				ENABLE_PREVIEWS = YES;
@@ -684,7 +708,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 311;
+				CURRENT_PROJECT_VERSION = 313;
 				DEVELOPMENT_ASSET_PATHS = "\"Rumble/Preview Content\"";
 				DEVELOPMENT_TEAM = TAK496UJ6Z;
 				ENABLE_PREVIEWS = YES;
@@ -721,7 +745,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 311;
+				CURRENT_PROJECT_VERSION = 313;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
@@ -740,7 +764,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 311;
+				CURRENT_PROJECT_VERSION = 313;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MARKETING_VERSION = 1.0;
@@ -758,7 +782,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 311;
+				CURRENT_PROJECT_VERSION = 313;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bsakhuja.PlateUITests;
@@ -775,7 +799,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 311;
+				CURRENT_PROJECT_VERSION = 313;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bsakhuja.PlateUITests;
