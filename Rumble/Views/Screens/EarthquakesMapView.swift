@@ -114,11 +114,21 @@ struct EarthquakesMapView: View {
                     }
                 }
 
-                Marker(item: .forCurrentLocation())
+                UserAnnotation()
                 ForEach(earthquakes, id: \.self) { quake in
-                    Marker(quake.properties.title, coordinate: quake.geometry.coordinate2D)
-                        .tag(quake.id)
-                        .tint(Color.magnitudeColor(for: quake.properties.magnitude))
+                    let isSelected = selectedEarthquake == quake
+                    Annotation(
+                        "",
+                        coordinate: quake.geometry.coordinate2D,
+                        anchor: .center
+                    ) {
+                        EarthquakePin(
+                            magnitude: quake.properties.magnitude,
+                            isSelected: isSelected
+                        )
+                    }
+                    .tag(quake.id)
+                    .annotationTitles(.hidden)
                 }
             }
             .mapStyle(mapStyle.resolved)
@@ -175,6 +185,28 @@ struct EarthquakesMapView: View {
                 }
             }
         }
+    }
+}
+
+struct EarthquakePin: View {
+    let magnitude: Double
+    let isSelected: Bool
+
+    private var magnitudeLabel: String {
+        if magnitude < 10 {
+            return String(format: "%.1f", magnitude)
+        }
+        return String(format: "%.0f", magnitude)
+    }
+
+    var body: some View {
+        Text(magnitudeLabel)
+            .font(.system(size: isSelected ? 13 : 11, weight: .bold, design: .rounded))
+            .foregroundStyle(.white)
+            .frame(width: isSelected ? 36 : 28, height: isSelected ? 36 : 28)
+            .background(Color.magnitudeColor(for: magnitude), in: Circle())
+            .shadow(color: Color.magnitudeColor(for: magnitude).opacity(0.5), radius: isSelected ? 6 : 3)
+            .animation(.spring(duration: 0.3), value: isSelected)
     }
 }
 

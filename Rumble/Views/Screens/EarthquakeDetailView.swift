@@ -44,8 +44,17 @@ struct EarthquakeDetailView: View {
                 }
                 NavigationLink("View on map") {
                     Map(initialPosition: earthquake.geometry.mapCameraPosition) {
-                        Marker(earthquake.properties.place ?? "Earthquake", coordinate: earthquake.geometry.coordinate2D)
-                            .tint(Color.magnitudeColor(for: earthquake.properties.magnitude))
+                        Annotation(
+                            "",
+                            coordinate: earthquake.geometry.coordinate2D,
+                            anchor: .center
+                        ) {
+                            EarthquakePin(
+                                magnitude: earthquake.properties.magnitude,
+                                isSelected: true
+                            )
+                        }
+                        .annotationTitles(.hidden)
                     }
                     .navigationTitle("Earthquake location")
                 }
