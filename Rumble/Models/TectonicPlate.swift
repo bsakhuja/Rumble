@@ -59,6 +59,7 @@ struct TectonicFeature: Decodable {
 }
 
 struct TectonicProperties: Decodable {
+    // swiftlint:disable:next identifier_name
     let PlateName: String
 }
 
@@ -66,12 +67,12 @@ struct PlateGeometry: Decodable {
     let allCoords: [[Double]]
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        switch try c.decode(String.self, forKey: .type) {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        switch try container.decode(String.self, forKey: .type) {
         case "Polygon":
-            allCoords = (try c.decode([[[Double]]].self, forKey: .coordinates)).first ?? []
+            allCoords = (try container.decode([[[Double]]].self, forKey: .coordinates)).first ?? []
         case "MultiPolygon":
-            allCoords = (try c.decode([[[[Double]]]].self, forKey: .coordinates)).compactMap(\.first).flatMap { $0 }
+            allCoords = (try container.decode([[[[Double]]]].self, forKey: .coordinates)).compactMap(\.first).flatMap { $0 }
         default:
             allCoords = []
         }
@@ -87,6 +88,11 @@ struct CompactBoundaryCollection: Decodable {
 }
 
 struct CompactBoundaryFeature: Decodable {
-    let t: BoundaryType
-    let c: [[Double]]
+    let type: BoundaryType
+    let coords: [[Double]]
+
+    private enum CodingKeys: String, CodingKey {
+        case type = "t"
+        case coords = "c"
+    }
 }

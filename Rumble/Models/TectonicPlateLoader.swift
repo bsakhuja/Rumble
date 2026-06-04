@@ -47,11 +47,11 @@ enum TectonicPlateLoader {
         }
 
         let segments = collection.features.flatMap { feature -> [PlateBoundarySegment] in
-            let coords = feature.c.compactMap { pair -> CLLocationCoordinate2D? in
+            let coords = feature.coords.compactMap { pair -> CLLocationCoordinate2D? in
                 guard pair.count >= 2 else { return nil }
                 return CLLocationCoordinate2D(latitude: pair[1], longitude: pair[0])
             }
-            return splitAtAntimeridian(coords).map { PlateBoundarySegment(type: feature.t, coordinates: $0) }
+            return splitAtAntimeridian(coords).map { PlateBoundarySegment(type: feature.type, coordinates: $0) }
         }
 
         _boundaries = segments
@@ -86,7 +86,6 @@ enum TectonicPlateLoader {
 
     // MARK: - Curated label positions for plates whose bounding-box centroid is misleading
 
-    // swiftlint:disable comma
     private static let labelOverrides: [String: CLLocationCoordinate2D] = [
         "Pacific": .init(latitude: 5, longitude: -165),
         "North America": .init(latitude: 55, longitude: -100),
@@ -141,11 +140,9 @@ enum TectonicPlateLoader {
         "Futuna": .init(latitude: -14, longitude: -178),
         "Panama": .init(latitude: 8, longitude: -80)
     ]
-    // swiftlint:enable comma
 
     // MARK: - Named faults & features
 
-    // swiftlint:disable function_body_length
     static let namedFaults: [NamedFault] = [
         // Divergent — mid-ocean ridges & rifts
         .init(name: "Mid-Atlantic Ridge", type: .divergent, coordinate: .init(latitude: 30, longitude: -40)),
@@ -190,5 +187,4 @@ enum TectonicPlateLoader {
         .init(name: "Chaman Fault", type: .transform, coordinate: .init(latitude: 31, longitude: 67)),
         .init(name: "Owen Fracture Zone", type: .transform, coordinate: .init(latitude: 14, longitude: 58))
     ]
-    // swiftlint:enable function_body_length
 }
