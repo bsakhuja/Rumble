@@ -18,8 +18,52 @@ struct EarthquakesMapView: View {
     @State private var boundaries: [PlateBoundarySegment] = []
     @State private var plates: [TectonicPlate] = []
     @State private var mapStyle: MapStyleOption = .standard
+    @State private var visibleRegion: MKCoordinateRegion?
 
     var earthquakes: [Earthquake] { state.earthquakes ?? [] }
+
+    // Only render boundaries whose bounding box intersects the visible viewport
+    private var visibleBoundaries: [PlateBoundarySegment] {
+        guard let region = visibleRegion else { return boundaries }
+        let latMin = region.center.latitude - region.span.latitudeDelta
+        let latMax = region.center.latitude + region.span.latitudeDelta
+        let lonMin = region.center.longitude - region.span.longitudeDelta
+        let lonMax = region.center.longitude + region.span.longitudeDelta
+        return boundaries.filter { seg in
+            seg.maxLat >= latMin && seg.minLat <= latMax &&
+            seg.maxLon >= lonMin && seg.minLon <= lonMax
+        }
+    }
+
+    // Only show plate labels within the viewport
+    private var visiblePlates: [TectonicPlate] {
+        guard let region = visibleRegion else { return plates }
+        let latMin = region.center.latitude - region.span.latitudeDelta
+        let latMax = region.center.latitude + region.span.latitudeDelta
+        let lonMin = region.center.longitude - region.span.longitudeDelta
+        let lonMax = region.center.longitude + region.span.longitudeDelta
+        return plates.filter { plate in
+            let lat = plate.labelCoordinate.latitude
+            let lon = plate.labelCoordinate.longitude
+            return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax
+        }
+    }
+
+    // Only show fault labels when zoomed in enough and within viewport
+    private var visibleFaults: [NamedFault] {
+        guard let region = visibleRegion else { return [] }
+        // Hide fault labels when zoomed out too far (span > 80° means nearly global view)
+        guard region.span.latitudeDelta < 80 else { return [] }
+        let latMin = region.center.latitude - region.span.latitudeDelta
+        let latMax = region.center.latitude + region.span.latitudeDelta
+        let lonMin = region.center.longitude - region.span.longitudeDelta
+        let lonMax = region.center.longitude + region.span.longitudeDelta
+        return TectonicPlateLoader.namedFaults.filter { fault in
+            let lat = fault.coordinate.latitude
+            let lon = fault.coordinate.longitude
+            return lat >= latMin && lat <= latMax && lon >= lonMin && lon <= lonMax
+        }
+    }
 
     var body: some View {
         if earthquakes.isEmpty && !state.isLoading {
@@ -35,17 +79,17 @@ struct EarthquakesMapView: View {
         } else {
             Map(position: $position, selection: $selectedEarthquake) {
                 if settings.showPlateBoundaries {
-                    ForEach(boundaries.indices, id: \.self) { idx in
-                        MapPolyline(coordinates: boundaries[idx].coordinates)
-                            .stroke(boundaries[idx].type.color.opacity(0.75), lineWidth: 1.5)
+                    ForEach(visibleBoundaries) { segment in
+                        MapPolyline(coordinates: segment.coordinates)
+                            .stroke(segment.type.color.opacity(0.75), lineWidth: 1.5)
                     }
-                    ForEach(plates.indices, id: \.self) { idx in
-                        Annotation("", coordinate: plates[idx].labelCoordinate) {
+                    ForEach(visiblePlates) { plate in
+                        Annotation("", coordinate: plate.labelCoordinate) {
                             HStack(spacing: 4) {
                                 Image(systemName: "globe.americas.fill")
                                     .font(.system(size: 8))
                                     .foregroundStyle(.secondary)
-                                Text(plates[idx].name)
+                                Text(plate.name)
                                     .font(.caption2.weight(.medium))
                             }
                             .padding(.horizontal, 6)
@@ -53,8 +97,7 @@ struct EarthquakesMapView: View {
                             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 5))
                         }
                     }
-                    ForEach(TectonicPlateLoader.namedFaults.indices, id: \.self) { idx in
-                        let fault = TectonicPlateLoader.namedFaults[idx]
+                    ForEach(visibleFaults) { fault in
                         Annotation("", coordinate: fault.coordinate) {
                             HStack(spacing: 4) {
                                 RoundedRectangle(cornerRadius: 1)
@@ -79,6 +122,9 @@ struct EarthquakesMapView: View {
                 }
             }
             .mapStyle(mapStyle.resolved)
+            .onMapCameraChange(frequency: .onEnd) { context in
+                visibleRegion = context.region
+            }
             .overlay(alignment: .bottomTrailing) {
                 VStack(spacing: 10) {
                     Button {

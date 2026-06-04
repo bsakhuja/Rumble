@@ -46,12 +46,17 @@ enum TectonicPlateLoader {
             return []
         }
 
+        var segmentID = 0
         let segments = collection.features.flatMap { feature -> [PlateBoundarySegment] in
             let coords = feature.coords.compactMap { pair -> CLLocationCoordinate2D? in
                 guard pair.count >= 2 else { return nil }
                 return CLLocationCoordinate2D(latitude: pair[1], longitude: pair[0])
             }
-            return splitAtAntimeridian(coords).map { PlateBoundarySegment(type: feature.type, coordinates: $0) }
+            return splitAtAntimeridian(coords).map { split -> PlateBoundarySegment in
+                let seg = PlateBoundarySegment(id: segmentID, type: feature.type, coordinates: split)
+                segmentID += 1
+                return seg
+            }
         }
 
         _boundaries = segments

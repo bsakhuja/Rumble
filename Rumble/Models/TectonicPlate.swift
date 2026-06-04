@@ -29,22 +29,55 @@ enum BoundaryType: String, Decodable {
 }
 
 // Label position + plate name — sourced from TectonicPlates.json.
-struct TectonicPlate {
+struct TectonicPlate: Identifiable {
+    let id: String
     let name: String
     let labelCoordinate: CLLocationCoordinate2D
+
+    init(name: String, labelCoordinate: CLLocationCoordinate2D) {
+        self.id = name
+        self.name = name
+        self.labelCoordinate = labelCoordinate
+    }
 }
 
 // Named fault/feature label for the map.
-struct NamedFault {
+struct NamedFault: Identifiable {
+    let id: String
     let name: String
     let type: BoundaryType
     let coordinate: CLLocationCoordinate2D
+
+    init(name: String, type: BoundaryType, coordinate: CLLocationCoordinate2D) {
+        self.id = name
+        self.name = name
+        self.type = type
+        self.coordinate = coordinate
+    }
 }
 
 // One typed boundary polyline — sourced from TectonicBoundaryTypes.json.
-struct PlateBoundarySegment {
+struct PlateBoundarySegment: Identifiable {
+    let id: Int
     let type: BoundaryType
     let coordinates: [CLLocationCoordinate2D]
+    /// Bounding box for fast viewport intersection checks.
+    let minLat: Double
+    let maxLat: Double
+    let minLon: Double
+    let maxLon: Double
+
+    init(id: Int, type: BoundaryType, coordinates: [CLLocationCoordinate2D]) {
+        self.id = id
+        self.type = type
+        self.coordinates = coordinates
+        let lats = coordinates.map(\.latitude)
+        let lons = coordinates.map(\.longitude)
+        self.minLat = lats.min() ?? 0
+        self.maxLat = lats.max() ?? 0
+        self.minLon = lons.min() ?? 0
+        self.maxLon = lons.max() ?? 0
+    }
 }
 
 // MARK: - GeoJSON decoding for TectonicPlates.json
