@@ -147,11 +147,11 @@ struct EarthquakesMapView: View {
                 .padding(.trailing, 16)
                 .padding(.bottom, 16)
             }
-            .overlay(alignment: .topLeading) {
+            .overlay(alignment: .bottomTrailing) {
                 if settings.showPlateBoundaries {
                     BoundaryTypeLegend()
-                        .padding(.leading, 16)
-                        .padding(.top, 8)
+                        .padding(.trailing, 60)
+                        .padding(.bottom, 16)
                 }
             }
             .onChange(of: selectedEarthquake) {
