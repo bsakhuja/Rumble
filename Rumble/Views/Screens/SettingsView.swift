@@ -46,6 +46,10 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Map") {
+                    Toggle("Show Plate Boundaries", isOn: $settings.showPlateBoundaries)
+                }
+
                 Section("About") {
                     Text("Rumble version \(AppVersionProvider.versionAndBuild)")
                     Text("Made by Brian Sakhuja")

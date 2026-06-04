@@ -54,6 +54,9 @@ final class SettingsState {
     var notificationsEnabled: Bool = UserDefaults.standard.bool(forKey: "notificationsEnabled") {
         didSet { UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled") }
     }
+    var showPlateBoundaries: Bool = UserDefaults.standard.bool(forKey: "showPlateBoundaries") {
+        didSet { UserDefaults.standard.set(showPlateBoundaries, forKey: "showPlateBoundaries") }
+    }
 
     var isPresented: Bool = false
 
