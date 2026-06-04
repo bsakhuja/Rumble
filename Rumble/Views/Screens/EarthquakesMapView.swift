@@ -34,17 +34,17 @@ struct EarthquakesMapView: View {
         } else {
             Map(position: $position, selection: $selectedEarthquake) {
                 if settings.showPlateBoundaries {
-                    ForEach(boundaries.indices, id: \.self) { i in
-                        MapPolyline(coordinates: boundaries[i].coordinates)
-                            .stroke(boundaries[i].type.color.opacity(0.75), lineWidth: 1.5)
+                    ForEach(boundaries.indices, id: \.self) { idx in
+                        MapPolyline(coordinates: boundaries[idx].coordinates)
+                            .stroke(boundaries[idx].type.color.opacity(0.75), lineWidth: 1.5)
                     }
-                    ForEach(plates.indices, id: \.self) { i in
-                        Annotation("", coordinate: plates[i].labelCoordinate) {
+                    ForEach(plates.indices, id: \.self) { idx in
+                        Annotation("", coordinate: plates[idx].labelCoordinate) {
                             HStack(spacing: 4) {
                                 Image(systemName: "globe.americas.fill")
                                     .font(.system(size: 8))
                                     .foregroundStyle(.secondary)
-                                Text(plates[i].name)
+                                Text(plates[idx].name)
                                     .font(.caption2.weight(.medium))
                             }
                             .padding(.horizontal, 6)
@@ -52,8 +52,8 @@ struct EarthquakesMapView: View {
                             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 5))
                         }
                     }
-                    ForEach(TectonicPlateLoader.namedFaults.indices, id: \.self) { i in
-                        let fault = TectonicPlateLoader.namedFaults[i]
+                    ForEach(TectonicPlateLoader.namedFaults.indices, id: \.self) { idx in
+                        let fault = TectonicPlateLoader.namedFaults[idx]
                         Annotation("", coordinate: fault.coordinate) {
                             HStack(spacing: 4) {
                                 RoundedRectangle(cornerRadius: 1)
